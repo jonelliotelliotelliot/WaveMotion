@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave Motion</title>
+    <!-- CSInterface.js is the library that allows HTML and ExtendScript to communicate. -->
+    <!-- CORRECTED PATH: Now pointing to the 'lib' folder to match your structure. -->
+    <script src="lib/CSInterface.js"></script>
+    <style>
+        :root {
+            --bg-color: #2d2d2d;
+            --panel-bg: #3c3c3c;
+            --text-color: #e0e0e0;
+            --primary-color: #4a90e2;
+            --border-color: #555;
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 15px;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow-y: auto; /* This enables the vertical scrollbar! */
+        }
+
+        /* --- NEW: Custom Scrollbar Styles --- */
+        /* This targets the entire scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        /* This targets the "track", the background area of the scrollbar */
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color); /* Match the panel background */
+        }
+
+        /* This targets the draggable "thumb" of the scrollbar */
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--border-color); /* Use the border color for the thumb */
+            border-radius: 20px;
+            border: 3px solid var(--bg-color); /* Create a padding effect around the thumb */
+        }
+
+        /* Change color of the thumb on hover for better UX */
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #777;
+        }
+        /* --- End of Scrollbar Styles --- */
+
+        .header, .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+
+        }
+
+        .header {
+            
+            display: flex;
+          
+            width: 100%;
+
+        }
+        .header h1 {
+            font-size: 12px;
+            margin: 0;
+            font-weight: 600;
+        }
+
+          .footer h1 {
+            font-size: 9px;
+            margin: 0;
+            font-weight: 100;
+        }
+
+
+        .section {
+            margin-bottom: 20px;
+
+        }
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            padding: 6px 0;
+
+
+            /*margin-bottom: 10px;*/
+            /*border-bottom: 1px solid var(--border-color);*/
+            /*padding-bottom: 5px;*/
+        }
+        .button-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap; /* Buttons will wrap to the next line if space is tight */
+        }
+        .btn {
+            background-color: var(--panel-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            flex-grow: 1; /* Makes buttons in a row share space equally */
+            text-align: center;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .btn:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-full-width {
+            flex-grow: 0;
+            width: 100%;
+        }
+        .swatch-grid {
+            display: grid;
+            /* This creates a responsive grid. It will fit as many 31px columns as possible. */
+            grid-template-columns: repeat(auto-fill, minmax(31px, 1fr));
+            gap: 8px;
+        }
+        .swatch {
+            width: 31px;
+            height: 31px;
+            border-radius: 4px;
+            border: 1px solid rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .swatch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        .section-title-container {
+             display: flex;
+             margin-bottom: 10px;
+             height: 27px;
+             width: 100%;
+
+
+            align-items: center;
+
+        }
+        .section-icon {
+            width:27px;
+            height: 27px;
+            padding-right:18px;
+        }
+
+        .section-icon img {
+            height: 100%;
+        }
+        .header-icon {
+            width: 50px;
+            height: 50px;
+        }
+        .header-icon img {
+            height: 100%;
+
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Wave Motion v1.1</h1>
+        <div class="header-icon"><img src="icons/wave.png"/></div>
+    </div>
+
+    <div class="section">
+        
+
+        <div class="section-title-container">
+        <div class="section-icon"><img src="icons/back-icon.png"/></div>
+        <div class="section-title">Back Easing</div>
+        </div>
+        
+        <div class="button-row">
+            <button class="btn" id="btnBackIn">Back In</button>
+            <button class="btn" id="btnBackOut">Back Out</button>
+            <button class="btn" id="btnBackInOut">Back In/Out</button>
+        </div>
+    </div>
+
+    <div class="section">
+
+        <div class="section-title-container">
+        <div class="section-icon"><img src="icons/ease-icon.png"/></div>
+        <div class="section-title">Generic Eases</div>
+        </div>
+
+        <div class="button-row">
+            <button class="btn" id="btnEasePwr3">InOut Pwr3</button>
+            <button class="btn" id="btnEasePwr2">InOut Pwr2</button>
+            <button class="btn" id="btnEasePwr1">InOut Pwr1</button>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title-container">
+        <div class="section-icon"><img src="icons/import-icon.png"/></div>
+        <div class="section-title">Import</div></div>
+
+        
+        <div class="button-row" id="import-buttons">
+            <!-- Import buttons will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- New Section for Text Animations -->
+    <div class="section">
+        <div class="section-title-container">
+        <div class="section-icon"><img src="icons/text-icon.png"/></div>
+        <div class="section-title">Text Animation</div>
+        </div>
+        <div class="button-row">
+            <button class="btn" id="btnCharAnim">Text Animation (char)</button>
+            <button class="btn" id="btnWordAnim">Text Animation (word)</button>
+        </div>
+    </div>
+
+
+
+    <div class="section">
+        <div class="section-title">Utilities</div>
+        <div class="button-row">
+            <button class="btn btn-full-width" id="btnClickAnim">Apply Click Animation</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Color Swatches</div>
+        <div class="swatch-grid" id="swatch-container">
+            <!-- Color swatches will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <div class="footer">
+        <h1> @description A dockable After Effects ScriptUI panel for applying custom easing presets,
+ * importing project elements, and performing other animation utilities.<br><br> @author jon elliot <br>@date 2025-07-06</h1>
+       
+    </div>
+
+    <script>
+        // This is the main script for the UI panel
+        (function () {
+            'use strict';
+
+            var csInterface = new CSInterface();
+
+            // --- DATA DEFINITIONS (from your original script) ---
+            const COMP_DEFS = [
+                { name: "cursor",        anchor: [32, 19],   collapse: true },
+                { name: "button-pill",   anchor: [200, 75],  collapse: true },
+                { name: "button-square", anchor: [238, 75],  collapse: true },
+                { name: "click-pulse",   anchor: [100, 100], collapse: true },
+                { name: "grad-stroke",   anchor: [525, 315], collapse: true },
+                { name: "status-flip",   anchor: [300, 300], collapse: false},
+                { name: "vessel-background",   anchor: [1920, 1080], collapse: false },
+                { name: "grid-background",   anchor: [1920, 1080], collapse: false },
+                { name: "vessel-transition",   anchor: [1920, 1080], collapse: false }   
+            ];
+
+            const SWATCH_COLORS = [
+                [0/255,  27/255, 102/255], [0/255,  64/255, 255/255], [50/255, 143/255, 248/255],
+                [118/255,195/255,252/255], [250/255,244/255,241/255], [243/255,167/255,255/255],
+                [143/255, 74/255, 226/255], [253/255,194/255, 55/255], [253/255,111/255, 0/255],
+                [0/255, 130/255, 56/255], [12/255, 69/255, 39/255]
+            ];
+
+            // --- UI BINDING ---
+            function init() {
+                // Easing Buttons
+                document.getElementById('btnBackIn').addEventListener('click', () => applyEase('backIn'));
+                document.getElementById('btnBackOut').addEventListener('click', () => applyEase('backOut'));
+                document.getElementById('btnBackInOut').addEventListener('click', () => applyEase('backInOut'));
+                document.getElementById('btnEasePwr3').addEventListener('click', () => applyEase('easeInOutPwr3'));
+                document.getElementById('btnEasePwr2').addEventListener('click', () => applyEase('easeInOutPwr2'));
+                document.getElementById('btnEasePwr1').addEventListener('click', () => applyEase('easeInOutPwr1'));
+                
+                // Utility Buttons
+                document.getElementById('btnClickAnim').addEventListener('click', applyClickAnimation);
+
+                // Dynamically create Import buttons
+                const importContainer = document.getElementById('import-buttons');
+                COMP_DEFS.forEach(def => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn';
+                    btn.textContent = def.name;
+                    btn.addEventListener('click', () => {
+                        // We pass the whole definition object as a JSON string
+                        importAndPlaceComp(JSON.stringify(def));
+                    });
+                    importContainer.appendChild(btn);
+                });
+
+                // Add this with your other event listeners
+                document.getElementById('btnCharAnim').addEventListener('click', applyCharAnimation);
+                document.getElementById('btnWordAnim').addEventListener('click', applyWordAnimation);
+
+
+
+                // Dynamically create Color Swatches
+                const swatchContainer = document.getElementById('swatch-container');
+                SWATCH_COLORS.forEach(color => {
+                    const swatch = document.createElement('div');
+                    swatch.className = 'swatch';
+                    const rgb = color.map(c => Math.round(c * 255));
+                    swatch.style.backgroundColor = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+                    swatch.title = `RGB: ${rgb.join(', ')}`; // Tooltip
+                    swatch.addEventListener('click', () => {
+                        // Pass the color array as a JSON string
+                        applySwatchColor(JSON.stringify(color));
+                    });
+                    swatchContainer.appendChild(swatch);
+                });
+            }
+
+            // --- ExtendScript Function Calls ---
+
+            function applyEase(easeKey) {
+                // evalScript runs a function from your .jsx file.
+                csInterface.evalScript(`applyEase("${easeKey}")`);
+            }
+
+            function applyClickAnimation() {
+                csInterface.evalScript('applyClickAnimation()');
+            }
+
+            function importAndPlaceComp(defAsJSON) {
+                var extensionPath = csInterface.getSystemPath(SystemPath.EXTENSION);
+                csInterface.evalScript(`importAndPlaceComp('${defAsJSON}', ${JSON.stringify(extensionPath)})`, function(result) {
+                var resultObj = JSON.parse(result);
+                console.log("Import Result:", resultObj);
+                 if (!resultObj.success) {
+                    alert(resultObj.message);
+                    } else {
+                    // Optional: Log success to the console
+                    console.log(resultObj.message);
+                    }
+                });
+            }
+
+            function applyCharAnimation() {
+                csInterface.evalScript('applyCharAnimation()', function(result) {
+                });
+            }
+
+             function applyWordAnimation() {
+                csInterface.evalScript('applyWordAnimation()', function(result) {
+                });
+            }
+
+
+            function applySwatchColor(colorAsJSON) {
+                csInterface.evalScript(`applySwatchColor('${colorAsJSON}')`);
+            }
+
+            init();
+
+        }());
+    </script>
+</body>
+</html>

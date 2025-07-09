@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    CORRECTION 4:
+    - Adopting the more robust naming convention from the working 'Overlord' manifest.
+    - Using reverse-domain style for the Bundle ID and a namespaced Extension ID.
+    - This is the most common standard for modern extensions and should resolve the loading issue.
+-->
+<ExtensionManifest Version="6.0" ExtensionBundleId="com.wavemotion.panel" ExtensionBundleVersion="1.1.0" ExtensionBundleName="Wave Motion" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ExtensionList>
+        <Extension Id="com.wavemotion.panel.main" Version="1.1.0" />
+    </ExtensionList>
+    <ExecutionEnvironment>
+        <HostList>
+            <Host Name="AEFT" Version="[0.0,99.9]" />
+        </HostList>
+        <LocaleList>
+            <Locale Code="All" />
+        </LocaleList>
+        <RequiredRuntimeList>
+            <RequiredRuntime Name="CSXS" Version="12.0" />
+        </RequiredRuntimeList>
+    </ExecutionEnvironment>
+    <DispatchInfoList>
+        <Extension Id="com.wavemotion.panel.main">
+            <DispatchInfo>
+                <Resources>
+                    <MainPath>./index.html</MainPath>
+                    <ScriptPath>./jsx/wave-motion.jsx</ScriptPath>
+                    <CEFCommandLine>
+                        <Parameter>--enable-nodejs</Parameter>
+                        <Parameter>--mixed-context</Parameter>
+                    </CEFCommandLine>
+                </Resources>
+                <Lifecycle>
+                    <AutoVisible>true</AutoVisible>
+                </Lifecycle>
+                <UI>
+                    <Type>Panel</Type>
+                    <Menu>Wave Motion</Menu>
+                    <Geometry>
+                        <Size>
+                            <Height>550</Height>
+                            <Width>300</Width>
+                        </Size>
+                        <MinSize>
+                            <Height>400</Height>
+                            <Width>220</Width>
+                        </MinSize>
+                        <MaxSize>
+                            <Height>1200</Height>
+                            <Width>800</Width>
+                        </MaxSize>
+                    </Geometry>
+                    <Icons/>
+                </UI>
+            </DispatchInfo>
+        </Extension>
+    </DispatchInfoList>
+</ExtensionManifest>
