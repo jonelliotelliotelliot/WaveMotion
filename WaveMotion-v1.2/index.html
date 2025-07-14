@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave Motion</title>
+    <script src="lib/CSInterface.js"></script>
+    <style>
+        :root {
+            --bg-color: #2d2d2d;
+            --panel-bg: #3c3c3c;
+            --text-color: #e0e0e0;
+            --primary-color: #4a90e2;
+            --border-color: #555;
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0 15px 15px 15px;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow-y: auto;
+            min-width: 100px;
+        }
+        ::-webkit-scrollbar { width: 16px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 20px;
+            border: 3px solid var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb:hover { background-color: #777; }
+
+        .header{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid;
+            border-color: #444;
+            height: 50px;
+        }
+
+            .footer {
+            display: flex;
+            justify-content: space-between;
+            
+        }
+
+
+        .header h1 { font-size: 12px; margin: 0; font-weight: 600; }
+        .footer { font-size: 9px; margin: 0; font-weight: 100; }
+        .section { margin-bottom: 20px; }
+        .section-title { font-size: 14px; font-weight: bold; padding: 6px 0; }
+        .button-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .btn {
+            background-color: var(--panel-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0px 12px;
+            font-size: 11px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.2s, border-color 0.2s;
+            font-family: var(--font-family);
+            height: 30px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .btn:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .btn-flex { flex-grow: 1; }
+        .btn-full-width { width: 100%; }
+
+        /* --- NEW/MODIFIED: Custom Dropdown Styles --- */
+        .custom-select-container {
+            position: relative;
+            flex-grow: 1;
+        }
+        .select-selected {
+            background-color: var(--panel-bg);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            height: 30px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-color: #FDC237;
+            font-size: 11px;
+
+
+        }
+        .select-selected.select-arrow-active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+        }
+        .select-selected::after {
+            content: "";
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--text-color);
+
+        }
+        .select-items {
+            position: absolute;
+            background-color: #4a4a4a;
+            top: 115%;
+            left: 0;
+            right: 0;
+            z-index: 99;
+            border: 0px solid var(--border-color);
+            border-top: none;
+            border-radius: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 11px;
+
+
+        }
+        .select-hide {
+            display: none;
+        }
+        .select-items div {
+            color: var(--text-color);
+            padding: 6px 14px;
+            cursor: pointer;
+            line-height: 1.2;
+        }
+        .select-items div:hover, .same-as-selected {
+            background-color: var(--primary-color);
+        }
+
+        .import-btn {
+            flex-grow: 0;
+            flex-shrink: 0;
+            width: 130px;
+
+        }
+        /* -- End Custom Dropdown Styles -- */
+
+        .swatch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(31px, 1fr));
+            gap: 6px;
+           
+        }
+        .swatch {
+            width: 31px; height: 31px; border-radius: 4px;
+            border: 1px solid rgba(0,0,0,0.2); cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .swatch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+        .section-title-container {
+             display: flex; margin-bottom: 10px;
+             height: 27px; width: 100%;
+             align-items: center;
+        }
+        .section-icon { width:24px; height: 24px; padding-right:12px; }
+        .section-icon img { height: 100%; }
+        .header-icon { width: 32px; height: 32px; }
+        .header-icon img { height: 100%; }
+
+        @media screen and (max-width: 280px) {
+            .custom-select-container {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+            .import-btn {
+                width: 100%;
+                flex-grow: 1;
+            }
+
+            .swatch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(22px, 1fr));
+            gap: 2px;
+            
+            }
+            .swatch {
+            width: 22px; height: 22px; border-radius: 4px;
+            }
+            
+        }
+
+         @media screen and (max-width: 150px) {
+            .custom-select-container {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+            .import-btn {
+                width: 100%;
+                flex-grow: 1;
+            }
+            .section-icon, .header-icon {
+                display: none;
+            }
+
+            body {
+               padding: 0 8px 8px 8px;
+
+            }
+
+            .swatch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(15px, 1fr));
+            gap: 2px;
+           
+            }
+            .swatch {
+            width: 15px; height: 15px; border-radius: 4px;
+            }
+            
+        }
+
+      
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Wave Motion v1.2</h1>
+        <div class="header-icon"><img src="icons/wave.png"/></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title-container">
+        <div class="section-icon"><img src="icons/back-icon.png"/></div>
+        <div class="section-title">Back Easing</div>
+        </div>
+        <div class="button-row">
+            <button class="btn btn-flex" id="btnBackIn">Back In</button>
+            <button class="btn btn-flex" id="btnBackOut">Back Out</button>
+            <button class="btn btn-flex" id="btnBackInOut">Back In/Out</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title-container">
+        <div class="section-icon"><img src="icons/ease-icon.png"/></div>
+        <div class="section-title">Generic Eases</div>
+        </div>
+        <div class="button-row">
+            <button class="btn btn-flex" id="btnEasePwr3">InOut Pwr3</button>
+            <button class="btn btn-flex" id="btnEasePwr2">InOut Pwr2</button>
+            <button class="btn btn-flex" id="btnEasePwr1">InOut Pwr1</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title-container">
+            <div class="section-icon"><img src="icons/import-icon.png"/></div>
+            <div class="section-title">Import</div>
+        </div>
+        <div class="button-row" id="import-container">
+             </div>
+    </div>
+    <div class="section">
+        <div class="section-title-container">
+        <div class="section-icon"><img src="icons/text-icon.png"/></div>
+        <div class="section-title">Text Animation</div>
+        </div>
+        <div class="button-row">
+            <button class="btn btn-flex" id="btnCharAnim">Character</button>
+            <button class="btn btn-flex" id="btnWordAnim">Word</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Utilities</div>
+        <div class="button-row">
+            <button class="btn btn-full-width" id="btnClickAnim">Apply Click Animation</button>
+        </div>
+        <div class="button-row" style="margin-top: 8px;">
+            <button class="btn btn-flex" id="btnCopyEase">Copy Easing</button>
+            <button class="btn btn-flex" id="btnPasteEase">Paste Easing</button>
+            <button class="btn btn-flex" id="btn-decomp">De-Comp</button>
+        </div>
+
+
+    </div>
+
+    <div class="section">
+        <div class="section-title">Color Swatches</div>
+        <div class="swatch-grid" id="swatch-container"></div>
+    </div>
+
+    <div class="footer">
+         @description A dockable After Effects ScriptUI panel for applying custom easing presets,
+ * importing project elements, and performing other animation utilities.<br><br> @author jon elliot <br>@date 2025-07-12
+    </div>
+
+
+    <script>
+        (function () {
+            'use strict';
+            var csInterface = new CSInterface();
+
+            const COMP_DEFS = [
+                { name: "cursor",        anchor: [32, 19],   collapse: true },
+                { name: "logo",          anchor: [300, 150],   collapse: true },
+                { name: "button-pill",   anchor: [200, 75],  collapse: true },
+                { name: "button-square", anchor: [238, 75],  collapse: true },
+                { name: "click-pulse",   anchor: [100, 100], collapse: true },
+                { name: "grad-stroke",   anchor: [525, 315], collapse: true },
+                { name: "status-flip",   anchor: [300, 300], collapse: false},
+                { name: "vessel-background",   anchor: [1920, 1080], collapse: false },
+                { name: "grid-background",   anchor: [1920, 1080], collapse: false },
+                { name: "vessel-transition",   anchor: [1920, 1080], collapse: false }   
+            ];
+
+            const SWATCH_COLORS = [
+                [0/255,  27/255, 102/255], [0/255,  64/255, 255/255], [50/255, 143/255, 248/255],
+                [118/255,195/255,252/255], [250/255,244/255,241/255], [243/255,167/255,255/255],
+                [143/255, 74/255, 226/255], [253/255,194/255, 55/255], [253/255,111/255, 0/255],
+                [0/255, 130/255, 56/255], [12/255, 69/255, 39/255]
+            ];
+
+            
+            var copiedEaseData = null;
+
+            // =================================================================
+            // NEW: Centralized Script Execution with Cleanup
+            // =================================================================
+            function runWithCleanup(scriptToRun, callback) {
+                csInterface.evalScript(scriptToRun, function(result) {
+                    // Always run cleanup after the main script finishes.
+                    csInterface.evalScript('forceUndoStackCleanup()');
+
+                    // If a callback was provided, run it with the result.
+                    if (callback) {
+                        callback(result);
+                    }
+                });
+            }
+
+             function runWithOutCleanup(scriptToRun, callback) {
+                csInterface.evalScript(scriptToRun, function(result) {
+                    // Always run cleanup after the main script finishes.
+                    csInterface.evalScript();
+
+
+                    // If a callback was provided, run it with the result.
+                    if (callback) {
+                        callback(result);
+                    }
+                });
+            }
+            // =================================================================
+
+            function init() {
+                // --- Event Listeners using the new runWithCleanup function ---
+                
+
+
+
+                document.getElementById('btnBackIn').addEventListener('click', () => runWithOutCleanup(`applyEase("backIn")`));
+                document.getElementById('btnBackOut').addEventListener('click', () => runWithOutCleanup(`applyEase("backOut")`));
+                document.getElementById('btnBackInOut').addEventListener('click', () => runWithOutCleanup(`applyEase("backInOut")`));
+                document.getElementById('btnEasePwr3').addEventListener('click', () => runWithOutCleanup(`applyEase("easeInOutPwr3")`));
+                document.getElementById('btnEasePwr2').addEventListener('click', () => runWithOutCleanup(`applyEase("easeInOutPwr2")`));
+                document.getElementById('btnEasePwr1').addEventListener('click', () => runWithOutCleanup(`applyEase("easeInOutPwr1")`));
+
+                document.getElementById('btnClickAnim').addEventListener('click', () => runWithOutCleanup('applyClickAnimation()'));
+                document.getElementById('btnCharAnim').addEventListener('click', () => runWithCleanup('applyCharAnimation()'));
+                document.getElementById('btnWordAnim').addEventListener('click', () => runWithCleanup('applyWordAnimation()'));
+                document.getElementById('btn-decomp').addEventListener('click', () => runWithCleanup('deconstructPrecomp()'));
+                document.getElementById('btnCopyEase').addEventListener('click', handleCopyEase); // Copy doesn't need cleanup
+                document.getElementById('btnPasteEase').addEventListener('click', handlePasteEase); // Paste has its own undo group
+
+                // === Custom Import Dropdown (Modified for Cleanup) ===
+                const importContainer = document.getElementById('import-container');
+                const selectContainer = document.createElement('div');
+                selectContainer.className = 'custom-select-container';
+                selectContainer.dataset.value = '';
+                const selectedDisplay = document.createElement('div');
+                selectedDisplay.className = 'select-selected';
+                selectContainer.appendChild(selectedDisplay);
+                const optionsList = document.createElement('div');
+                optionsList.className = 'select-items select-hide';
+                
+                COMP_DEFS.forEach((def, index) => {
+                    const option = document.createElement('div');
+                    option.textContent = def.name;
+                    option.dataset.value = JSON.stringify(def);
+                    option.addEventListener('click', function() {
+                        selectedDisplay.textContent = this.textContent;
+                        selectContainer.dataset.value = this.dataset.value;
+                        optionsList.classList.add('select-hide');
+                        selectedDisplay.classList.remove('select-arrow-active');
+                    });
+                    optionsList.appendChild(option);
+                    if (index === 0) {
+                        selectedDisplay.textContent = def.name;
+                        selectContainer.dataset.value = JSON.stringify(def);
+                    }
+                });
+                selectContainer.appendChild(optionsList);
+
+                selectedDisplay.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    optionsList.classList.toggle('select-hide');
+                    this.classList.toggle('select-arrow-active');
+                });
+                
+                const importBtn = document.createElement('button');
+                importBtn.className = 'btn import-btn';
+                importBtn.textContent = 'Import';
+                importBtn.addEventListener('click', () => {
+                    if (selectContainer.dataset.value) {
+                        var extensionPath = csInterface.getSystemPath(SystemPath.EXTENSION);
+                        var defAsJSON = selectContainer.dataset.value;
+                        var script = `importAndPlaceComp('${defAsJSON}', ${JSON.stringify(extensionPath)})`;
+                        runWithCleanup(script, function(result) {
+                            // This callback handles any error messages from the import script.
+                            try {
+                                var resultObj = JSON.parse(result);
+                                if (!resultObj.success) {
+                                    alert(resultObj.message);
+                                }
+                            } catch (e) {
+                                console.error("Failed to parse JSX result", e);
+                            }
+                        });
+                    }
+                });
+
+                importContainer.appendChild(selectContainer);
+                importContainer.appendChild(importBtn);
+
+                document.addEventListener('click', function() {
+                    optionsList.classList.add('select-hide');
+                    selectedDisplay.classList.remove('select-arrow-active');
+                });
+
+                // --- Color Swatches (Modified for Cleanup) ---
+                const swatchContainer = document.getElementById('swatch-container');
+                SWATCH_COLORS.forEach(color => {
+                    const swatch = document.createElement('div');
+                    swatch.className = 'swatch';
+                    const rgb = color.map(c => Math.round(c * 255));
+                    swatch.style.backgroundColor = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+                    swatch.title = `RGB: ${rgb.join(', ')}`;
+                    swatch.addEventListener('click', () => runWithOutCleanup(`applySwatchColor('${JSON.stringify(color)}')`));
+                    swatchContainer.appendChild(swatch);
+                });
+            }
+
+            // --- Handlers for Copy/Paste which have special logic ---
+            function handleCopyEase() {
+                csInterface.evalScript('copySelectedEases()', function(result) {
+                    if (result && result !== '[]') {
+                        copiedEaseData = result; 
+                    } else {
+                        copiedEaseData = null;
+                    }
+                });
+            }
+
+            function handlePasteEase() {
+                // This function has its own robust undo group and doesn't need the extra cleanup.
+                if (copiedEaseData) {
+                    // Pass the existing JSON string directly, wrapping it in single quotes
+                    // to make it a valid string literal in ExtendScript.
+                    var script = 'pasteSelectedEases(\'' + copiedEaseData + '\')';
+                    csInterface.evalScript(script);
+                } else {
+                    // If no data is copied, call the function with null to trigger the alert.
+                    csInterface.evalScript('pasteSelectedEases(null)');
+                }
+            }
+
+            init();
+        }());
+    </script>
+</body>
+</html>
